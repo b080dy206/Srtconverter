@@ -17,7 +17,7 @@ def webvtt_to_srt(webvtt_text):
     for line in lines:
         if "-->" in line:
             # إضافة التوقيت
-            srt_text += f"{index}\n{line}\n"
+            srt_text += f"{index}\n{line.replace('.', ',')}\n"  # تغيير النقطة إلى فاصلة
             index += 1
         else:
             # إضافة الترجمة
@@ -25,15 +25,13 @@ def webvtt_to_srt(webvtt_text):
     
     return srt_text
 
-# استقبال ملفات WEBVTT وتحويلها إلى SRT
-@bot.message_handler(content_types=['document'])
-def handle_file(message):
-    file_id = message.document.file_id
-    file_info = bot.get_file(file_id)
-    file = bot.download_file(file_info.file_path)
+# استقبال النصوص وتحويلها إلى SRT
+@bot.message_handler(func=lambda message: True, content_types=['text'])
+def handle_message(message):
+    webvtt_text = message.text
     
     # تحويل WEBVTT إلى SRT
-    srt_content = webvtt_to_srt(file.decode('utf-8'))
+    srt_content = webvtt_to_srt(webvtt_text)
     
     # حفظ الملف SRT
     with open("converted_subtitles.srt", "w", encoding="utf-8") as f:
